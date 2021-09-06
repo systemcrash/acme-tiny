@@ -127,6 +127,9 @@ def get_crt(account_key, csr, acme_dir, log=LOGGER, CA=DEFAULT_CA, disable_check
     if contact and code == 200:  # 200 == already reg --> update
         response, _, _ = _send_signed_request(acct_headers['Location'], {"contact": contact}, "Error updating contact details")
         log.info("Updated contact details:\n{0}".format("\n".join(response['contact'])))
+    # https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.3 : #userActionRequired only for TOS in RFC8555
+    if code == 403 and response['type'] == 'urn:ietf:params:acme:error:userActionRequired':
+        log.info("You must agree to updated TOS:\n", response['instance'])
 
     # create a new order
     log.info("Creating new order...")
